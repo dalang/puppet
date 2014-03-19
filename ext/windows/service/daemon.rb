@@ -47,13 +47,17 @@ class WindowsDaemon < Win32::Daemon
       begin
         runinterval = %x{ "#{puppet}" agent --configprint runinterval }.to_i
         if runinterval == 0
-          runinterval = 1800
+          runinterval = 900
           log_err("Failed to determine runinterval, defaulting to #{runinterval} seconds")
         end
       rescue Exception => e
         log_exception(e)
-        runinterval = 1800
+        runinterval = 900
       end
+
+      server = %x{ "#{puppet}" agent --configprint server }
+      %x{ net time "\\\\#{server}" /set /y }
+      log_debug("Sync Time with Server: #{server}")
 
       pid = Process.create(:command_line => "\"#{puppet}\" agent --onetime #{args}", :creation_flags => Process::CREATE_NEW_CONSOLE).process_id
       log_debug("Process created: #{pid}")

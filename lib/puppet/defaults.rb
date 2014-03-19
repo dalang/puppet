@@ -1155,7 +1155,7 @@ EOT
         `noop => true` will only be simulated, even when noop mode is globally disabled.)",
     },
     :runinterval => {
-      :default  => "30m",
+      :default  => "15m",
       :type     => :duration,
       :desc     => "How often puppet agent applies the catalog.
           Note that a runinterval of 0 means \"run continuously\" rather than

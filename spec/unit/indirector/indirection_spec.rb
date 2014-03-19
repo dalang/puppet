@@ -174,8 +174,8 @@ describe Puppet::Indirector::Indirection do
     end
 
     it "should default to the :runinterval setting, converted to an integer, for its ttl" do
-      Puppet[:runinterval] = 1800
-      @indirection.ttl.should == 1800
+      Puppet[:runinterval] = 900
+      @indirection.ttl.should == 900
     end
 
     it "should calculate the current expiration by adding the TTL to the current time" do
