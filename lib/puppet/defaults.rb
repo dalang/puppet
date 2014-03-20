@@ -1401,7 +1401,11 @@ EOT
       dependencies set with the before/require/notify/subscribe metaparameters
       and the `->`/`~>` chaining arrows; this setting only affects the relative
       ordering of _unrelated_ resources."
-    }
+    },
+    :active_model_uuid => {
+      :default => "",
+      :desc => "active_model uuid of razor"
+    },
   )
 
   define_settings(:inspect,
