@@ -44,6 +44,17 @@ class WindowsDaemon < Win32::Daemon
         return
       end
 
+      if File.exists?(file_path = 'c:\puppetboot.bat')
+        sleep(180) # delay to ensure network is enabled
+        open3_exec(file_path) { %x( del #{file_path} ) }
+      end
+
+      if File.exists?(file_path = 'c:\razor_puppet.pp')
+        command = "\"#{puppet}\" apply #{file_path}"
+        open3_exec(command) { %x( del #{file_path} && shutdown -r -t 00 ) }
+        sleep(60) # waiting for execution of `shutdown`
+      end
+
       log_debug("Using '#{puppet}'")
       begin
         runinterval = %x{ "#{puppet}" agent --configprint runinterval }.to_i
@@ -60,12 +71,11 @@ class WindowsDaemon < Win32::Daemon
       server.strip!
       stdout, stderr, status = Open3.capture3("net time \\\\#{server} /set /y")
 
-      log_debug(stdout)
-      log_debug(stderr)
-      if status.successful?
+      log_debug("sync time: #{stdout}")
+      if status.success?
         log_notice("Sync Time with Server: [#{server}] succeed")
       else
-        log_notice("Sync Time with Server: [#{server}] failed")
+        log_err("Sync Time with Server [#{server}] failed: #{stderr}")
       end
 
       pid = Process.create(:command_line => "\"#{puppet}\" agent --onetime #{args}", :creation_flags => Process::CREATE_NEW_CONSOLE).process_id
@@ -84,6 +94,22 @@ class WindowsDaemon < Win32::Daemon
   def service_stop
     log_notice('Service stopping')
     Thread.main.wakeup
+  end
+
+  def open3_exec(command)
+      begin
+        log_notice("try to run [#{command}] via Open3")
+        stdout, stderr, status = Open3.capture3(command)
+        log_notice("stdout: #{stdout}")
+        if status.success?
+          log_notice("[#{command}]: succeed")
+          yield if block_given?
+        else
+          log_err("[#{command}] failed: #{stderr}")
+        end
+      rescue => e
+        log_err("open3 error: #{e.message}")
+      end
   end
 
   def log_exception(e)
