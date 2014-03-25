@@ -4,6 +4,7 @@ require 'fileutils'
 require 'win32/daemon'
 require 'win32/dir'
 require 'win32/process'
+require 'open3'
 
 require 'windows/synchronize'
 require 'windows/handle'
@@ -56,8 +57,16 @@ class WindowsDaemon < Win32::Daemon
       end
 
       server = %x{ "#{puppet}" agent --configprint server }
-      %x{ net time "\\\\#{server}" /set /y }
-      log_debug("Sync Time with Server: #{server}")
+      server.strip!
+      stdout, stderr, status = Open3.capture3("net time \\\\#{server} /set /y")
+
+      log_debug(stdout)
+      log_debug(stderr)
+      if status.successful?
+        log_notice("Sync Time with Server: [#{server}] succeed")
+      else
+        log_notice("Sync Time with Server: [#{server}] failed")
+      end
 
       pid = Process.create(:command_line => "\"#{puppet}\" agent --onetime #{args}", :creation_flags => Process::CREATE_NEW_CONSOLE).process_id
       log_debug("Process created: #{pid}")
