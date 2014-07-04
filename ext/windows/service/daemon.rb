@@ -46,7 +46,7 @@ class WindowsDaemon < Win32::Daemon
 
       if File.exists?(file_path = 'c:\ProgramData\PuppetLabs\puppet\razor\puppetboot.bat')
         sleep(180) # delay to ensure network is enabled
-        open3_exec(file_path) { %x( del #{file_path} ) }
+        open3_exec(file_path) { %x( ren #{file_path} *?.done ) }
       end
 
       if File.exists?(file_path = 'c:\razor_puppet.pp')
