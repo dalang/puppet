@@ -1,7 +1,7 @@
 @echo off
 
 REM get mac address
-ipconfig /all|find /i "ç‰©ç†åœ°å€" > tmp.txt
+ipconfig /all|find /i "ÎïÀíµØÖ·" > tmp.txt
 type tmp.txt
 set /p mac=<tmp.txt
 del tmp.txt
