@@ -20,8 +20,21 @@ set mac=!modified!
 )
 del %INTEXTFILE%
 
+REM call get-dhcp-server.bat
+
+set FILENAME=dhcp.txt
+ipconfig /all | find /i "dhcp ·þÎñÆ÷" > "%FILENAME%"
+FOR /F "tokens=1,2,3* delims=. " %%i in ( %FILENAME% ) do ( 
+set dhcp=%%l
+)
+
+del %FILENAME%
+
+if [%dhcp%] EQU [] set dhcp=baremetal.razor.server
+set razor-server=%dhcp%
+
 echo wget puppet booting files
-wget.exe http://baremetal.razor.server:8026/razor/api/winpeboot/puppet/?hw_id=%mac% -O C:\puppet-files.bat
+wget.exe http://%razor-server%:8026/razor/api/winpeboot/puppet/?hw_id=%mac% -O C:\puppet-files.bat
 call C:\puppet-files.bat
 if %errorlevel% == 0 (
 echo delete c:\puppet-files.bat after execution
